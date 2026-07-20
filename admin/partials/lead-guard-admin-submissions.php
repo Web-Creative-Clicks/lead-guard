@@ -4,18 +4,18 @@ if (!defined('ABSPATH')) {
 }
 
 global $wpdb;
-$table = $wpdb->prefix . LEADGUARD_SAID_TABLE;
+$table = $wpdb->prefix . leadguard_wcc_TABLE;
 
 /* --- Handle row actions ----------------------------------------------- */
-if (isset($_POST['leadguard_said_action'], $_POST['leadguard_said_id']) && check_admin_referer('leadguard_said_row_action')) {
-    $id = (int) $_POST['leadguard_said_id'];
-    $action = sanitize_text_field($_POST['leadguard_said_action']);
+if (isset($_POST['leadguard_wcc_action'], $_POST['leadguard_wcc_id']) && check_admin_referer('leadguard_wcc_row_action')) {
+    $id = (int) $_POST['leadguard_wcc_id'];
+    $action = sanitize_text_field($_POST['leadguard_wcc_action']);
 
     if ($action === 'mark_fake') {
         $row = $wpdb->get_row($wpdb->prepare("SELECT ip_address, email FROM {$table} WHERE id=%d", $id));
         $wpdb->update($table, ['status' => 'rejected'], ['id' => $id]);
         if ($row) {
-            $settings = leadguard_said_get_settings();
+            $settings = leadguard_wcc_get_settings();
 
             // Add IP (deduplicated, validated)
             $ips = array_unique(array_filter(
@@ -34,9 +34,9 @@ if (isset($_POST['leadguard_said_action'], $_POST['leadguard_said_id']) && check
             }
             $settings['blocked_emails'] = implode("\n", $emails);
 
-            update_option('leadguard_said_settings', $settings);
+            update_option('leadguard_wcc_settings', $settings);
         }
-        echo '<div class="updated"><p>Marked fake — IP &amp; email added to blocklists.</p></div>';
+        echo '<div class="updated"><p>Marked fake â€” IP &amp; email added to blocklists.</p></div>';
 
     } elseif ($action === 'mark_clean') {
         $wpdb->update($table, ['status' => 'clean'], ['id' => $id]);
@@ -64,18 +64,18 @@ $rows = $wpdb->get_results("SELECT * FROM {$table} {$where} ORDER BY created_at 
 $counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$table} GROUP BY status", OBJECT_K);
 ?>
 <div class="wrap">
-    <h1>Lead Guard — Submissions</h1>
+    <h1>Lead Guard â€” Submissions</h1>
     <ul class="subsubsub">
-        <li><a href="?page=leadguard-said">All</a> |</li>
-        <li><a href="?page=leadguard-said&status=clean">Clean (
+        <li><a href="?page=leadguard-wcc">All</a> |</li>
+        <li><a href="?page=leadguard-wcc&status=clean">Clean (
                 <?php echo (int) ($counts['clean']->c ?? 0); ?>)
             </a> |
         </li>
-        <li><a href="?page=leadguard-said&status=suspicious">Suspicious
+        <li><a href="?page=leadguard-wcc&status=suspicious">Suspicious
                 (
                 <?php echo (int) ($counts['suspicious']->c ?? 0); ?>)
             </a> |</li>
-        <li><a href="?page=leadguard-said&status=rejected">Rejected
+        <li><a href="?page=leadguard-wcc&status=rejected">Rejected
                 (
                 <?php echo (int) ($counts['rejected']->c ?? 0); ?>)
             </a></li>
@@ -84,12 +84,12 @@ $counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$table} GROUP BY s
     <!-- Bulk delete -->
     <form method="post" style="margin:12px 0;"
         onsubmit="return confirm('Delete <?php echo $filter ? esc_js(strtoupper($filter)) . ' ' : 'ALL '; ?>submissions? This cannot be undone.');">
-        <?php wp_nonce_field('leadguard_said_row_action'); ?>
-        <input type="hidden" name="leadguard_said_id" value="0">
-        <input type="hidden" name="leadguard_said_action" value="delete_list">
+        <?php wp_nonce_field('leadguard_wcc_row_action'); ?>
+        <input type="hidden" name="leadguard_wcc_id" value="0">
+        <input type="hidden" name="leadguard_wcc_action" value="delete_list">
         <input type="hidden" name="delete_list_status" value="<?php echo esc_attr($filter); ?>">
         <button class="button button-secondary" style="color:#d63638;border-color:#d63638;">
-            🗑 Delete
+            ðŸ—‘ Delete
             <?php echo $filter ? esc_html(strtoupper($filter)) . ' list' : 'ALL submissions'; ?>
         </button>
     </form>
@@ -115,19 +115,19 @@ $counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$table} GROUP BY s
                 <?php
                 // Source badge config
                 $src_labels = [
-                    'meta_ads' => ['📘 Meta Ads', '#1877f2'],
-                    'google_ads' => ['🔍 Google Ads', '#34a853'],
-                    'tiktok_ads' => ['🎵 TikTok Ads', '#010101'],
-                    'bing_ads' => ['🅱 Bing Ads', '#0078d4'],
-                    'twitter_ads' => ['𝕏 Twitter Ads', '#1da1f2'],
+                    'meta_ads' => ['ðŸ“˜ Meta Ads', '#1877f2'],
+                    'google_ads' => ['ðŸ” Google Ads', '#34a853'],
+                    'tiktok_ads' => ['ðŸŽµ TikTok Ads', '#010101'],
+                    'bing_ads' => ['ðŸ…± Bing Ads', '#0078d4'],
+                    'twitter_ads' => ['ð• Twitter Ads', '#1da1f2'],
                     'linkedin_ads' => ['in LinkedIn Ads', '#0a66c2'],
-                    'snapchat_ads' => ['👻 Snapchat Ads', '#fffc00'],
-                    'paid_utm' => ['💰 Paid (UTM)', '#e67e22'],
-                    'utm_organic' => ['🔗 UTM Organic', '#8e44ad'],
-                    'organic_search' => ['🔎 Organic Search', '#27ae60'],
-                    'organic_social' => ['📣 Organic Social', '#2980b9'],
-                    'referral' => ['↩ Referral', '#7f8c8d'],
-                    'direct' => ['🔗 Direct', '#95a5a6'],
+                    'snapchat_ads' => ['ðŸ‘» Snapchat Ads', '#fffc00'],
+                    'paid_utm' => ['ðŸ’° Paid (UTM)', '#e67e22'],
+                    'utm_organic' => ['ðŸ”— UTM Organic', '#8e44ad'],
+                    'organic_search' => ['ðŸ”Ž Organic Search', '#27ae60'],
+                    'organic_social' => ['ðŸ“£ Organic Social', '#2980b9'],
+                    'referral' => ['â†© Referral', '#7f8c8d'],
+                    'direct' => ['ðŸ”— Direct', '#95a5a6'],
                 ];
                 ?>
                 <tr>
@@ -165,7 +165,7 @@ $counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$table} GROUP BY s
                         <?php
                         $dev_key = $r->device_id ?: $r->device_fingerprint;
                         if ($dev_key) {
-                            $dev_short = substr($dev_key, 0, 8) . '…';
+                            $dev_short = substr($dev_key, 0, 8) . 'â€¦';
                             $dev_bad_count = (int) $wpdb->get_var($wpdb->prepare(
                                 "SELECT COUNT(*) FROM {$table} WHERE (device_id=%s OR device_fingerprint=%s) AND status IN ('rejected','suspicious')",
                                 $dev_key,
@@ -173,7 +173,7 @@ $counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$table} GROUP BY s
                             ));
                             echo '<code title="' . esc_attr($dev_key) . '">' . esc_html($dev_short) . '</code>';
                             if ($dev_bad_count > 1) {
-                                echo ' <span style="color:#d63638;font-weight:700;">×' . (int) $dev_bad_count . '</span>';
+                                echo ' <span style="color:#d63638;font-weight:700;">Ã—' . (int) $dev_bad_count . '</span>';
                             }
                         } else {
                             echo '<span style="color:#d63638;">no cookie</span>';
@@ -194,13 +194,13 @@ $counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$table} GROUP BY s
                     </td>
                     <td>
                         <form method="post" style="display:inline;white-space:nowrap;">
-                            <?php wp_nonce_field('leadguard_said_row_action'); ?>
-                            <input type="hidden" name="leadguard_said_id" value="<?php echo (int) $r->id; ?>">
-                            <button class="button button-small" name="leadguard_said_action" value="mark_fake">Block
+                            <?php wp_nonce_field('leadguard_wcc_row_action'); ?>
+                            <input type="hidden" name="leadguard_wcc_id" value="<?php echo (int) $r->id; ?>">
+                            <button class="button button-small" name="leadguard_wcc_action" value="mark_fake">Block
                                 IP+Email</button>
-                            <button class="button button-small" name="leadguard_said_action" value="mark_clean">Mark
+                            <button class="button button-small" name="leadguard_wcc_action" value="mark_clean">Mark
                                 Clean</button>
-                            <button class="button button-small" name="leadguard_said_action" value="delete"
+                            <button class="button button-small" name="leadguard_wcc_action" value="delete"
                                 style="color:#d63638;border-color:#d63638;"
                                 onclick="return confirm('Delete this submission?')">Delete</button>
                         </form>

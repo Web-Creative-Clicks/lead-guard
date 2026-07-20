@@ -8,17 +8,17 @@ class Lead_Guard_API
     public function register_routes(): void
     {
         add_action('rest_api_init', function () {
-            register_rest_route('leadguard-said/v1', '/submit', [
+            register_rest_route('leadguard-wcc/v1', '/submit', [
                 'methods' => 'POST',
                 'callback' => [$this, 'handle_submission'],
                 'permission_callback' => '__return_true'
             ]);
-            register_rest_route('leadguard-said/v1', '/init', [
+            register_rest_route('leadguard-wcc/v1', '/init', [
                 'methods' => 'GET',
                 'callback' => [$this, 'handle_init'],
                 'permission_callback' => '__return_true'
             ]);
-            register_rest_route('leadguard-said/v1', '/check-email', [
+            register_rest_route('leadguard-wcc/v1', '/check-email', [
                 'methods' => 'POST',
                 'callback' => [$this, 'check_email_endpoint'],
                 'permission_callback' => '__return_true'
@@ -38,16 +38,16 @@ class Lead_Guard_API
 
     public function handle_init(WP_REST_Request $req): WP_REST_Response
     {
-        $ip = leadguard_said_get_client_ip();
-        $settings = leadguard_said_get_settings();
+        $ip = leadguard_wcc_get_client_ip();
+        $settings = leadguard_wcc_get_settings();
 
-        if (leadguard_said_rate_limited('init', $ip, (int) $settings['rate_limit_init_per_10min'], 10 * MINUTE_IN_SECONDS)) {
+        if (leadguard_wcc_rate_limited('init', $ip, (int) $settings['rate_limit_init_per_10min'], 10 * MINUTE_IN_SECONDS)) {
             return new WP_REST_Response(['error' => 'rate_limited'], 429);
         }
 
-        leadguard_said_ensure_device_cookie();
+        leadguard_wcc_ensure_device_cookie();
 
-        $secret = get_option('leadguard_said_hmac_secret');
+        $secret = get_option('leadguard_wcc_hmac_secret');
         $issued_at = time();
         $nonce = bin2hex(random_bytes(16));
 
@@ -87,12 +87,12 @@ class Lead_Guard_API
 
     public function check_email_endpoint(WP_REST_Request $req): WP_REST_Response
     {
-        $settings = leadguard_said_get_settings();
+        $settings = leadguard_wcc_get_settings();
         $api_key = trim($settings['email_verify_api_key']);
         $email = sanitize_email((string) $req->get_param('email'));
 
-        $ip = leadguard_said_get_client_ip();
-        if (leadguard_said_rate_limited('check_email', $ip, (int) $settings['rate_limit_checkemail_per_10min'], 10 * MINUTE_IN_SECONDS)) {
+        $ip = leadguard_wcc_get_client_ip();
+        if (leadguard_wcc_rate_limited('check_email', $ip, (int) $settings['rate_limit_checkemail_per_10min'], 10 * MINUTE_IN_SECONDS)) {
             return new WP_REST_Response(['valid' => true, 'reason' => 'rate_limited_fail_open'], 200);
         }
 
@@ -126,9 +126,9 @@ class Lead_Guard_API
 
     public function handle_submission(WP_REST_Request $req): WP_REST_Response
     {
-        $settings = leadguard_said_get_settings();
+        $settings = leadguard_wcc_get_settings();
         global $wpdb;
-        $table = $wpdb->prefix . LEADGUARD_SAID_TABLE;
+        $table = $wpdb->prefix . leadguard_wcc_TABLE;
 
         $params = $req->get_params();
         
@@ -136,7 +136,7 @@ class Lead_Guard_API
             return new WP_REST_Response(['success' => false, 'error' => 'payload_too_large'], 413);
         }
         
-        $ip = leadguard_said_get_client_ip();
+        $ip = leadguard_wcc_get_client_ip();
         $ua = sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? '');
         $name = sanitize_text_field($params['name'] ?? '');
         $email = sanitize_email($params['email'] ?? '');
@@ -146,10 +146,10 @@ class Lead_Guard_API
         $honeypot = $params['website_url'] ?? '';
         $mouse_moves = (int) ($params['mouse_moves'] ?? 0);
         $key_presses = (int) ($params['key_presses'] ?? 0);
-        $webdriver = leadguard_said_is_truthy($params['webdriver'] ?? false);
+        $webdriver = leadguard_wcc_is_truthy($params['webdriver'] ?? false);
         $turnstile_token = $params['cf_turnstile_response'] ?? '';
         $form_token = $params['form_token'] ?? '';
-        $decoy_hit = leadguard_said_is_truthy($params['decoy_hit'] ?? false);
+        $decoy_hit = leadguard_wcc_is_truthy($params['decoy_hit'] ?? false);
 
         $allowed_sources = [
             'meta_ads', 'google_ads', 'tiktok_ads', 'bing_ads', 'twitter_ads',
@@ -170,13 +170,13 @@ class Lead_Guard_API
         }
 
         if ($settings['require_turnstile']) {
-            if (!leadguard_said_verify_turnstile($turnstile_token, $settings['turnstile_secret_key'])) {
+            if (!leadguard_wcc_verify_turnstile($turnstile_token, $settings['turnstile_secret_key'])) {
                 $score += 100;
                 $reasons[] = 'turnstile_failed';
             }
         }
 
-        $token_data = leadguard_said_verify_token($form_token, $ip, $ua);
+        $token_data = leadguard_wcc_verify_token($form_token, $ip, $ua);
 
         if ($settings['require_math_captcha']) {
             if ($token_data === false) {
@@ -242,12 +242,12 @@ class Lead_Guard_API
             $reasons[] = 'missing_user_agent';
         }
 
-        if (!empty($email) && leadguard_said_is_disposable_email($email)) {
+        if (!empty($email) && leadguard_wcc_is_disposable_email($email)) {
             $score += 25;
             $reasons[] = 'disposable_email';
         }
 
-        if (!empty($phone) && !leadguard_said_valid_phone($phone, $settings['phone_country'])) {
+        if (!empty($phone) && !leadguard_wcc_valid_phone($phone, $settings['phone_country'])) {
             $score += 20;
             $reasons[] = 'invalid_phone_format';
         }
@@ -295,7 +295,7 @@ class Lead_Guard_API
             }
         }
 
-        $device_cookie_id = leadguard_said_verify_device_cookie();
+        $device_cookie_id = leadguard_wcc_verify_device_cookie();
         $device_fp = sanitize_text_field($params['device_fp'] ?? '');
         $device_key = $device_cookie_id ?: ($device_fp ?: null);
 
@@ -350,16 +350,16 @@ class Lead_Guard_API
             'token_fp_mismatch' => $token_fp_mismatch,
         ]);
 
-        leadguard_said_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, $score, $status, $reasons, $traffic_source, $utm_params);
+        leadguard_wcc_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, $score, $status, $reasons, $traffic_source, $utm_params);
 
         if ($status === 'rejected') {
             return new WP_REST_Response(['success' => true], 200);
         }
         if ($status === 'clean') {
-            do_action('leadguard_said_clean_lead', compact('name', 'email', 'phone', 'page_url', 'fbclid'));
-            leadguard_said_maybe_send_meta_lead_event($email, $phone, $ip, $ua);
+            do_action('leadguard_wcc_clean_lead', compact('name', 'email', 'phone', 'page_url', 'fbclid'));
+            leadguard_wcc_maybe_send_meta_lead_event($email, $phone, $ip, $ua);
         } else {
-            leadguard_said_notify_admin_suspicious($name, $email, $phone, $score, $reasons);
+            leadguard_wcc_notify_admin_suspicious($name, $email, $phone, $score, $reasons);
         }
 
         return new WP_REST_Response(['success' => true, 'status' => $status], 200);

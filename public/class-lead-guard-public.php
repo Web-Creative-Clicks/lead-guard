@@ -7,7 +7,7 @@ class Lead_Guard_Public
 {
     public function register_shortcodes(): void
     {
-        add_shortcode('leadguard_said_form', [$this, 'render_shortcode']);
+        add_shortcode('leadguard_wcc_form', [$this, 'render_shortcode']);
     }
 
     public function render_shortcode($atts): string
@@ -17,21 +17,21 @@ class Lead_Guard_Public
         $instance++;
 
         $atts = shortcode_atts([
-            'title' => 'سجل معلوماتك',
-            'button_text' => 'سجل دابا',
+            'title' => 'Ø³Ø¬Ù„ Ù…Ø¹Ù„ÙˆÙ…Ø§ØªÙƒ',
+            'button_text' => 'Ø³Ø¬Ù„ Ø¯Ø§Ø¨Ø§',
             'redirect' => '',
-        ], $atts, 'leadguard_said_form');
+        ], $atts, 'leadguard_wcc_form');
 
-        $settings = leadguard_said_get_settings();
+        $settings = leadguard_wcc_get_settings();
         $uid = 'u' . $instance . bin2hex(random_bytes(4));
-        $init_url = esc_url(rest_url('leadguard-said/v1/init'));
-        $submit_url = esc_url(rest_url('leadguard-said/v1/submit'));
-        $check_email_url = esc_url(rest_url('leadguard-said/v1/check-email'));
+        $init_url = esc_url(rest_url('leadguard-wcc/v1/init'));
+        $submit_url = esc_url(rest_url('leadguard-wcc/v1/submit'));
+        $check_email_url = esc_url(rest_url('leadguard-wcc/v1/check-email'));
         $site_key = esc_attr($settings['turnstile_site_key']);
         $require_turnstile = !empty($settings['require_turnstile']);
         $require_math_captcha = !empty($settings['require_math_captcha']);
         $email_verify_enabled = !empty($settings['email_verify_api_key']);
-        // Priority: shortcode attribute → plugin global setting → '' (show inline message)
+        // Priority: shortcode attribute â†’ plugin global setting â†’ '' (show inline message)
         $redirect = esc_url_raw(
             !empty($atts['redirect'])
             ? $atts['redirect']
@@ -39,7 +39,7 @@ class Lead_Guard_Public
         );
 
         /* ------------------------------------------------------------------
-         * SELECTOR MAP — new cryptographically random names every page load
+         * SELECTOR MAP â€” new cryptographically random names every page load
          * ------------------------------------------------------------------ */
         $mode = $settings['selector_rotation_mode'] ?? 'pageload';
 
@@ -48,25 +48,25 @@ class Lead_Guard_Public
             if (!session_id()) {
                 @session_start();
             }
-            $map_key = 'leadguard_said_smap_' . $uid;
+            $map_key = 'leadguard_wcc_smap_' . $uid;
             if (empty($_SESSION[$map_key])) {
-                $_SESSION[$map_key] = leadguard_said_generate_selector_map($uid);
+                $_SESSION[$map_key] = leadguard_wcc_generate_selector_map($uid);
             }
             $m = $_SESSION[$map_key];
 
         } elseif ($mode === 'interval') {
             // New names every N minutes (stored in WordPress transient)
             $interval = max(1, (int) ($settings['selector_interval_min'] ?? 30));
-            $tk = 'leadguard_said_imap_' . $uid;
+            $tk = 'leadguard_wcc_imap_' . $uid;
             $m = get_transient($tk);
             if (!$m) {
-                $m = leadguard_said_generate_selector_map($uid);
+                $m = leadguard_wcc_generate_selector_map($uid);
                 set_transient($tk, $m, $interval * MINUTE_IN_SECONDS);
             }
 
         } else {
-            // 'pageload' — fresh map every render (default, strongest)
-            $m = leadguard_said_generate_selector_map($uid);
+            // 'pageload' â€” fresh map every render (default, strongest)
+            $m = leadguard_wcc_generate_selector_map($uid);
         }
 
         // Shorthand aliases
@@ -95,18 +95,18 @@ class Lead_Guard_Public
         <div class="<?php echo esc_attr($cls_wrap); ?>" id="<?php echo esc_attr($id_wrap); ?>">
 
             <!-- ============================================================
-                 SCOPED CSS  — every selector is the random class for this render
+                 SCOPED CSS  â€” every selector is the random class for this render
                  ============================================================ -->
             <style>
                 /* Reset */
-                /* Google Font — Tajawal (Bold) */
+                /* Google Font â€” Tajawal (Bold) */
                 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap');
 
                 #<?php echo esc_attr($id_wrap); ?>* {
                     box-sizing: border-box;
                 }
 
-                /* Wrapper — keep the entire shortcode area black without changing form logic */
+                /* Wrapper â€” keep the entire shortcode area black without changing form logic */
                 .<?php echo esc_attr($cls_wrap); ?> {
                     position: relative;
                     width: 100%;
@@ -118,7 +118,7 @@ class Lead_Guard_Public
                     clip-path: inset(0 -100vmax);
                 }
 
-                /* Form card — pure black like the reference */
+                /* Form card â€” pure black like the reference */
                 #<?php echo esc_attr($id_form); ?> {
                     max-width: 500px;
                     margin: 0 auto;
@@ -154,7 +154,7 @@ class Lead_Guard_Public
                     text-align: right;
                 }
 
-                /* Input — white background, black text, like the reference */
+                /* Input â€” white background, black text, like the reference */
                 #<?php echo esc_attr($id_form); ?>.<?php echo esc_attr($cls_input); ?> {
                     width: 100%;
                     padding: 15px 16px;
@@ -185,7 +185,7 @@ class Lead_Guard_Public
                     box-shadow: 0 0 0 3px rgba(255, 68, 68, .2) !important;
                 }
 
-                /* Button — yellow (#FFD400) with black bold text + glow */
+                /* Button â€” yellow (#FFD400) with black bold text + glow */
                 #<?php echo esc_attr($id_form); ?>.<?php echo esc_attr($cls_btn); ?> {
                     width: 100%;
                     padding: 16px;
@@ -291,21 +291,21 @@ class Lead_Guard_Public
 
                 <!-- Name -->
                 <div class="<?php echo esc_attr($cls_field); ?>">
-                    <label class="<?php echo esc_attr($cls_label); ?>">الاسم الكامل</label>
-                    <input class="<?php echo esc_attr($cls_input); ?>" data-field="name" type="text" placeholder="الاسم الكامل"
+                    <label class="<?php echo esc_attr($cls_label); ?>">Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„</label>
+                    <input class="<?php echo esc_attr($cls_input); ?>" data-field="name" type="text" placeholder="Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„"
                         autocomplete="name" required>
                 </div>
 
                 <!-- Email -->
                 <div class="<?php echo esc_attr($cls_field); ?>">
-                    <label class="<?php echo esc_attr($cls_label); ?>">البريد الإلكتروني</label>
+                    <label class="<?php echo esc_attr($cls_label); ?>">Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</label>
                     <input class="<?php echo esc_attr($cls_input); ?>" data-field="email" type="email"
                         placeholder="example@email.com" autocomplete="email" required>
                 </div>
 
                 <!-- Phone -->
                 <div class="<?php echo esc_attr($cls_field); ?>">
-                    <label class="<?php echo esc_attr($cls_label); ?>">رقم الهاتف</label>
+                    <label class="<?php echo esc_attr($cls_label); ?>">Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ</label>
                     <input class="<?php echo esc_attr($cls_input); ?>" data-field="phone" type="tel" inputmode="numeric"
                         pattern="[0-9]+" placeholder="0612345678" autocomplete="tel" required>
                 </div>
@@ -320,7 +320,7 @@ class Lead_Guard_Public
                     <div class="<?php echo esc_attr($cls_captcha_row); ?>">
                         <span class="<?php echo esc_attr($cls_captcha_q); ?>" data-field="captcha-question">...</span>
                         <input class="<?php echo esc_attr($cls_captcha_a); ?>" data-field="captcha-answer" type="text"
-                            inputmode="numeric" placeholder="؟" autocomplete="off">
+                            inputmode="numeric" placeholder="ØŸ" autocomplete="off">
                     </div>
                 <?php endif; ?>
 
@@ -394,8 +394,8 @@ class Lead_Guard_Public
                         const d = await fetch(INIT_URL, { credentials: 'same-origin' }).then(r => r.json());
                         serverToken = d.token || '';
                         if (REQUIRE_MATH_CAPTCHA && captchaQ) {
-                            const opSymbol = d.op === 'mul' ? '×' : d.op === 'sub' ? '−' : '+';
-                            captchaQ.innerHTML = 'كم يساوي <bdi>' + d.a + ' ' + opSymbol + ' ' + d.b + '</bdi> ؟';
+                            const opSymbol = d.op === 'mul' ? 'Ã—' : d.op === 'sub' ? 'âˆ’' : '+';
+                            captchaQ.innerHTML = 'ÙƒÙ… ÙŠØ³Ø§ÙˆÙŠ <bdi>' + d.a + ' ' + opSymbol + ' ' + d.b + '</bdi> ØŸ';
                         }
                     } catch (e) { serverToken = ''; }
                 }
@@ -550,10 +550,10 @@ class Lead_Guard_Public
                     const result = await checkEmail(val);
                     if (!result.valid) {
                         emailEl.classList.add(INPUT_ERR_CLS);
-                        errorBox.textContent = 'أدخل بريداً إلكترونياً صحيحاً.';
+                        errorBox.textContent = 'Ø£Ø¯Ø®Ù„ Ø¨Ø±ÙŠØ¯Ø§Ù‹ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Ù‹ ØµØ­ÙŠØ­Ø§Ù‹.';
                     } else {
                         emailEl.classList.remove(INPUT_ERR_CLS);
-                        if (errorBox.textContent === 'أدخل بريداً إلكترونياً صحيحاً.') errorBox.textContent = '';
+                        if (errorBox.textContent === 'Ø£Ø¯Ø®Ù„ Ø¨Ø±ÙŠØ¯Ø§Ù‹ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Ù‹ ØµØ­ÙŠØ­Ø§Ù‹.') errorBox.textContent = '';
                     }
                 });
 
@@ -567,19 +567,19 @@ class Lead_Guard_Public
                     const tsRes = $('[name="cf-turnstile-response"]')?.value || '';
 
                     if (!name || !email || !phone) {
-                        errorBox.textContent = 'عمر جميع المعلومات من فضلك.';
+                        errorBox.textContent = 'Ø¹Ù…Ø± Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ù…Ù† ÙØ¶Ù„Ùƒ.';
                         return;
                     }
                     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                        errorBox.textContent = 'أدخل بريداً إلكترونياً صحيحاً.';
+                        errorBox.textContent = 'Ø£Ø¯Ø®Ù„ Ø¨Ø±ÙŠØ¯Ø§Ù‹ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Ù‹ ØµØ­ÙŠØ­Ø§Ù‹.';
                         return;
                     }
                     if (REQUIRE_TURNSTILE && !tsRes) {
-                        errorBox.textContent = 'المرجو تأكيد أنك لست روبوت.';
+                        errorBox.textContent = 'Ø§Ù„Ù…Ø±Ø¬Ùˆ ØªØ£ÙƒÙŠØ¯ Ø£Ù†Ùƒ Ù„Ø³Øª Ø±ÙˆØ¨ÙˆØª.';
                         return;
                     }
                     if (REQUIRE_MATH_CAPTCHA && captchaA && captchaA.value.trim() === '') {
-                        errorBox.textContent = 'جاوب على السؤال من فضلك.';
+                        errorBox.textContent = 'Ø¬Ø§ÙˆØ¨ Ø¹Ù„Ù‰ Ø§Ù„Ø³Ø¤Ø§Ù„ Ù…Ù† ÙØ¶Ù„Ùƒ.';
                         return;
                     }
 
@@ -588,14 +588,14 @@ class Lead_Guard_Public
                         const emailResult = await checkEmail(email);
                         if (!emailResult.valid) {
                             emailEl.classList.add(INPUT_ERR_CLS);
-                            errorBox.textContent = 'أدخل بريداً إلكترونياً صحيحاً.';
+                            errorBox.textContent = 'Ø£Ø¯Ø®Ù„ Ø¨Ø±ÙŠØ¯Ø§Ù‹ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Ù‹ ØµØ­ÙŠØ­Ø§Ù‹.';
                             return;
                         }
                     }
 
                     errorBox.textContent = '';
                     btn.disabled = true;
-                    btn.textContent = 'جاري التسجيل...';
+                    btn.textContent = 'Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ³Ø¬ÙŠÙ„...';
 
                     const _pixelEventId = 'lead_' + Date.now() + '_' + Math.random().toString(36).slice(2);
 
@@ -658,7 +658,7 @@ class Lead_Guard_Public
 
                         if (!resp.ok || result.success === false) {
                             if (result.error === 'captcha_mismatch') {
-                                errorBox.textContent = 'الجواب خاطئ، جاوب على السؤال الجديد.';
+                                errorBox.textContent = 'Ø§Ù„Ø¬ÙˆØ§Ø¨ Ø®Ø§Ø·Ø¦ØŒ Ø¬Ø§ÙˆØ¨ Ø¹Ù„Ù‰ Ø§Ù„Ø³Ø¤Ø§Ù„ Ø§Ù„Ø¬Ø¯ÙŠØ¯.';
                                 if (captchaA) captchaA.value = '';
                                 await fetchNewToken();
                                 btn.disabled = false;
@@ -675,13 +675,13 @@ class Lead_Guard_Public
                         if (REDIRECT_URL) {
                             setTimeout(() => { window.location.href = REDIRECT_URL; }, 350);
                         } else {
-                            wrap.innerHTML = '<div class="' + SUCCESS_CLS + '">تم التسجيل بنجاح، شكرا ليك!</div>';
+                            wrap.innerHTML = '<div class="' + SUCCESS_CLS + '">ØªÙ… Ø§Ù„ØªØ³Ø¬ÙŠÙ„ Ø¨Ù†Ø¬Ø§Ø­ØŒ Ø´ÙƒØ±Ø§ Ù„ÙŠÙƒ!</div>';
                         }
                     } catch (err) {
                         btn.disabled = false;
                         btn.textContent = BTN_LABEL;
                         if (typeof turnstile !== 'undefined') turnstile.reset();
-                        errorBox.textContent = 'وقع مشكل، عاود حاول.';
+                        errorBox.textContent = 'ÙˆÙ‚Ø¹ Ù…Ø´ÙƒÙ„ØŒ Ø¹Ø§ÙˆØ¯ Ø­Ø§ÙˆÙ„.';
                     }
                 });
             })();

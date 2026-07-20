@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 /**
  * Generate one random token: letter prefix + N hex chars.
  */
-function leadguard_said_rand_token(string $prefix = 'a', int $length = 8): string
+function leadguard_wcc_rand_token(string $prefix = 'a', int $length = 8): string
 {
     return $prefix . bin2hex(random_bytes((int) ceil($length / 2)));
 }
@@ -14,30 +14,30 @@ function leadguard_said_rand_token(string $prefix = 'a', int $length = 8): strin
 /**
  * Build a complete selector map for one form instance.
  */
-function leadguard_said_generate_selector_map(string $uid): array
+function leadguard_wcc_generate_selector_map(string $uid): array
 {
-    $map['id_wrap'] = 'w_' . leadguard_said_rand_token('x', 8) . '_' . $uid;
-    $map['id_form'] = 'f_' . leadguard_said_rand_token('y', 8) . '_' . $uid;
-    $map['id_decoy'] = 'd_' . leadguard_said_rand_token('z', 8) . '_' . $uid;
+    $map['id_wrap'] = 'w_' . leadguard_wcc_rand_token('x', 8) . '_' . $uid;
+    $map['id_form'] = 'f_' . leadguard_wcc_rand_token('y', 8) . '_' . $uid;
+    $map['id_decoy'] = 'd_' . leadguard_wcc_rand_token('z', 8) . '_' . $uid;
 
-    $map['cls_wrap'] = leadguard_said_rand_token('w', 9);
-    $map['cls_form'] = leadguard_said_rand_token('f', 9);
-    $map['cls_title'] = leadguard_said_rand_token('t', 9);
-    $map['cls_field'] = leadguard_said_rand_token('d', 9);
-    $map['cls_label'] = leadguard_said_rand_token('l', 9);
-    $map['cls_input'] = leadguard_said_rand_token('i', 9);
-    $map['cls_input_err'] = leadguard_said_rand_token('e', 9);
-    $map['cls_btn'] = leadguard_said_rand_token('b', 9);
-    $map['cls_error_box'] = leadguard_said_rand_token('r', 9);
-    $map['cls_success'] = leadguard_said_rand_token('s', 9);
-    $map['cls_captcha_row'] = leadguard_said_rand_token('c', 9);
-    $map['cls_captcha_q'] = leadguard_said_rand_token('q', 9);
-    $map['cls_captcha_a'] = leadguard_said_rand_token('a', 9);
+    $map['cls_wrap'] = leadguard_wcc_rand_token('w', 9);
+    $map['cls_form'] = leadguard_wcc_rand_token('f', 9);
+    $map['cls_title'] = leadguard_wcc_rand_token('t', 9);
+    $map['cls_field'] = leadguard_wcc_rand_token('d', 9);
+    $map['cls_label'] = leadguard_wcc_rand_token('l', 9);
+    $map['cls_input'] = leadguard_wcc_rand_token('i', 9);
+    $map['cls_input_err'] = leadguard_wcc_rand_token('e', 9);
+    $map['cls_btn'] = leadguard_wcc_rand_token('b', 9);
+    $map['cls_error_box'] = leadguard_wcc_rand_token('r', 9);
+    $map['cls_success'] = leadguard_wcc_rand_token('s', 9);
+    $map['cls_captcha_row'] = leadguard_wcc_rand_token('c', 9);
+    $map['cls_captcha_q'] = leadguard_wcc_rand_token('q', 9);
+    $map['cls_captcha_a'] = leadguard_wcc_rand_token('a', 9);
 
     return $map;
 }
 
-function leadguard_said_default_settings(): array
+function leadguard_wcc_default_settings(): array
 {
     return [
         'block_threshold' => 50,
@@ -70,18 +70,18 @@ function leadguard_said_default_settings(): array
     ];
 }
 
-function leadguard_said_get_settings(): array
+function leadguard_wcc_get_settings(): array
 {
     return wp_parse_args(
-        get_option('leadguard_said_settings', []),
-        leadguard_said_default_settings()
+        get_option('leadguard_wcc_settings', []),
+        leadguard_wcc_default_settings()
     );
 }
 
-function leadguard_said_verify_token(string $token, string $current_ip = '', string $current_ua = ''): array|false
+function leadguard_wcc_verify_token(string $token, string $current_ip = '', string $current_ua = ''): array|false
 {
-    $settings = leadguard_said_get_settings();
-    $secret = get_option('leadguard_said_hmac_secret');
+    $settings = leadguard_wcc_get_settings();
+    $secret = get_option('leadguard_wcc_hmac_secret');
     $decoded = base64_decode($token, true);
     if (!$decoded) return false;
 
@@ -108,7 +108,7 @@ function leadguard_said_verify_token(string $token, string $current_ip = '', str
     $max_age = (int) $settings['token_max_age_min'] * MINUTE_IN_SECONDS;
     if ((time() - $issued_at) > $max_age) return false;
 
-    $used_key = 'leadguard_said_used_' . md5($nonce);
+    $used_key = 'leadguard_wcc_used_' . md5($nonce);
     if (get_transient($used_key)) return false;
     set_transient($used_key, 1, $max_age + 60);
 
@@ -121,13 +121,13 @@ function leadguard_said_verify_token(string $token, string $current_ip = '', str
     return ['issued_at' => $issued_at, 'answer' => (int) $answer, 'fp_mismatch' => $fp_mismatch];
 }
 
-function leadguard_said_is_truthy($v): bool
+function leadguard_wcc_is_truthy($v): bool
 {
     if (is_bool($v)) return $v;
     return in_array(strtolower(trim((string) $v)), ['true', '1', 'yes', 'on'], true);
 }
 
-function leadguard_said_rate_limited(string $bucket, string $key, int $max, int $window_seconds): bool
+function leadguard_wcc_rate_limited(string $bucket, string $key, int $max, int $window_seconds): bool
 {
     if ($max <= 0) return false;
     $tkey = 'lgs_rl_' . $bucket . '_' . md5($key);
@@ -143,7 +143,7 @@ function leadguard_said_rate_limited(string $bucket, string $key, int $max, int 
     return false;
 }
 
-function leadguard_said_cloudflare_ranges(): array
+function leadguard_wcc_cloudflare_ranges(): array
 {
     $ranges = [
         '173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22',
@@ -153,10 +153,10 @@ function leadguard_said_cloudflare_ranges(): array
         '2606:4700::/32', '2803:f800::/32', '2405:b500::/32', '2405:8100::/32',
         '2a06:98c0::/29', '2c0f:f248::/32',
     ];
-    return apply_filters('leadguard_said_cloudflare_ranges', $ranges);
+    return apply_filters('leadguard_wcc_cloudflare_ranges', $ranges);
 }
 
-function leadguard_said_ip_in_cidr(string $ip, string $cidr): bool
+function leadguard_wcc_ip_in_cidr(string $ip, string $cidr): bool
 {
     if (strpos($cidr, '/') === false) return $ip === $cidr;
     [$subnet, $bits] = explode('/', $cidr);
@@ -181,20 +181,20 @@ function leadguard_said_ip_in_cidr(string $ip, string $cidr): bool
     return ($ip_long & $mask) === ($subnet_long & $mask);
 }
 
-function leadguard_said_request_is_from_cloudflare(): bool
+function leadguard_wcc_request_is_from_cloudflare(): bool
 {
     $remote = $_SERVER['REMOTE_ADDR'] ?? '';
     if (!$remote) return false;
-    foreach (leadguard_said_cloudflare_ranges() as $cidr) {
-        if (leadguard_said_ip_in_cidr($remote, $cidr)) return true;
+    foreach (leadguard_wcc_cloudflare_ranges() as $cidr) {
+        if (leadguard_wcc_ip_in_cidr($remote, $cidr)) return true;
     }
     return false;
 }
 
-function leadguard_said_get_client_ip(): string
+function leadguard_wcc_get_client_ip(): string
 {
-    $settings = leadguard_said_get_settings();
-    if (!empty($settings['trust_cf_ip_only']) && !leadguard_said_request_is_from_cloudflare()) {
+    $settings = leadguard_wcc_get_settings();
+    if (!empty($settings['trust_cf_ip_only']) && !leadguard_wcc_request_is_from_cloudflare()) {
         $remote = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
         return filter_var($remote, FILTER_VALIDATE_IP) ? $remote : '0.0.0.0';
     }
@@ -208,15 +208,15 @@ function leadguard_said_get_client_ip(): string
     return '0.0.0.0';
 }
 
-function leadguard_said_sign_device_id(string $id, string $secret): string
+function leadguard_wcc_sign_device_id(string $id, string $secret): string
 {
     return $id . '.' . substr(hash_hmac('sha256', $id, $secret), 0, 32);
 }
 
-function leadguard_said_verify_device_cookie(): ?string
+function leadguard_wcc_verify_device_cookie(): ?string
 {
-    $secret = get_option('leadguard_said_hmac_secret');
-    $raw = $_COOKIE[LEADGUARD_SAID_DEVICE_COOKIE] ?? '';
+    $secret = get_option('leadguard_wcc_hmac_secret');
+    $raw = $_COOKIE[leadguard_wcc_DEVICE_COOKIE] ?? '';
     if (!$raw || strpos($raw, '.') === false) return null;
     [$id, $sig] = array_pad(explode('.', $raw, 2), 2, '');
     if (!$id || !$sig) return null;
@@ -225,16 +225,16 @@ function leadguard_said_verify_device_cookie(): ?string
     return $id;
 }
 
-function leadguard_said_ensure_device_cookie(): string
+function leadguard_wcc_ensure_device_cookie(): string
 {
-    $existing = leadguard_said_verify_device_cookie();
+    $existing = leadguard_wcc_verify_device_cookie();
     if ($existing !== null) return $existing;
 
-    $secret = get_option('leadguard_said_hmac_secret');
+    $secret = get_option('leadguard_wcc_hmac_secret');
     $new_id = bin2hex(random_bytes(16));
-    $cookie_value = leadguard_said_sign_device_id($new_id, $secret);
+    $cookie_value = leadguard_wcc_sign_device_id($new_id, $secret);
 
-    setcookie(LEADGUARD_SAID_DEVICE_COOKIE, $cookie_value, [
+    setcookie(leadguard_wcc_DEVICE_COOKIE, $cookie_value, [
         'expires' => time() + YEAR_IN_SECONDS,
         'path' => '/',
         'secure' => is_ssl(),
@@ -245,11 +245,11 @@ function leadguard_said_ensure_device_cookie(): string
     return $new_id;
 }
 
-function leadguard_said_verify_turnstile(string $token, string $secret): bool
+function leadguard_wcc_verify_turnstile(string $token, string $secret): bool
 {
     if (empty($token) || empty($secret)) return false;
     $resp = wp_remote_post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-        'body' => ['secret' => $secret, 'response' => $token, 'remoteip' => leadguard_said_get_client_ip()],
+        'body' => ['secret' => $secret, 'response' => $token, 'remoteip' => leadguard_wcc_get_client_ip()],
         'timeout' => 8,
     ]);
     if (is_wp_error($resp)) return false;
@@ -257,7 +257,7 @@ function leadguard_said_verify_turnstile(string $token, string $secret): bool
     return !empty($body['success']);
 }
 
-function leadguard_said_is_disposable_email(string $email): bool
+function leadguard_wcc_is_disposable_email(string $email): bool
 {
     $domain = strtolower(substr(strrchr($email, '@'), 1));
     $disposable = [
@@ -268,7 +268,7 @@ function leadguard_said_is_disposable_email(string $email): bool
     return in_array($domain, $disposable, true);
 }
 
-function leadguard_said_valid_phone(string $phone, string $country = 'MA'): bool
+function leadguard_wcc_valid_phone(string $phone, string $country = 'MA'): bool
 {
     $digits = preg_replace('/\D/', '', $phone);
     if ($country === 'MA') {
@@ -277,9 +277,9 @@ function leadguard_said_valid_phone(string $phone, string $country = 'MA'): bool
     return strlen($digits) >= 8 && strlen($digits) <= 15;
 }
 
-function leadguard_said_notify_admin_suspicious($name, $email, $phone, $score, $reasons): void
+function leadguard_wcc_notify_admin_suspicious($name, $email, $phone, $score, $reasons): void
 {
-    $settings = leadguard_said_get_settings();
+    $settings = leadguard_wcc_get_settings();
     if (empty($settings['notify_email'])) return;
     wp_mail(
         $settings['notify_email'],
@@ -288,9 +288,9 @@ function leadguard_said_notify_admin_suspicious($name, $email, $phone, $score, $
     );
 }
 
-function leadguard_said_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, $score, $status, $reasons, $traffic_source = 'direct', $utm_params = ''): array
+function leadguard_wcc_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, $score, $status, $reasons, $traffic_source = 'direct', $utm_params = ''): array
 {
-    $settings = leadguard_said_get_settings();
+    $settings = leadguard_wcc_get_settings();
     $url = trim((string) ($settings['google_sheets_webhook'] ?? ''));
 
     if ($url === '' || !wp_http_validate_url($url)) {
@@ -301,7 +301,7 @@ function leadguard_said_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, 
             'body' => '',
             'checked_at' => current_time('mysql'),
         ];
-        update_option('leadguard_said_last_sheets_result', $result, false);
+        update_option('leadguard_wcc_last_sheets_result', $result, false);
         return $result;
     }
 
@@ -323,7 +323,7 @@ function leadguard_said_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, 
         'headers' => [
             'Content-Type' => 'application/json; charset=utf-8',
             'Accept' => 'application/json, text/plain, */*',
-            'User-Agent' => 'WordPress/Lead-Guard-Said-' . LEADGUARD_SAID_VERSION,
+            'User-Agent' => 'WordPress/Lead-Guard-WCC-' . leadguard_wcc_VERSION,
         ],
         'body' => wp_json_encode($payload),
         'timeout' => 8,
@@ -353,7 +353,7 @@ function leadguard_said_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, 
         ];
     }
 
-    update_option('leadguard_said_last_sheets_result', $result, false);
+    update_option('leadguard_wcc_last_sheets_result', $result, false);
 
     if (!$result['success']) {
         error_log('[Lead Guard] Google Sheets delivery failed: ' . wp_json_encode($result));
@@ -362,9 +362,9 @@ function leadguard_said_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, 
     return $result;
 }
 
-function leadguard_said_maybe_send_meta_lead_event($email, $phone, $ip, $ua): void
+function leadguard_wcc_maybe_send_meta_lead_event($email, $phone, $ip, $ua): void
 {
-    $settings = leadguard_said_get_settings();
+    $settings = leadguard_wcc_get_settings();
     if (empty($settings['meta_pixel_id']) || empty($settings['meta_capi_token'])) return;
 
     $user_data = ['client_ip_address' => $ip, 'client_user_agent' => $ua];

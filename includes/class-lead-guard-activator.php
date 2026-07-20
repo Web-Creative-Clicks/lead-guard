@@ -8,7 +8,7 @@ class Lead_Guard_Activator
     public static function activate(): void
     {
         global $wpdb;
-        $table = $wpdb->prefix . LEADGUARD_SAID_TABLE;
+        $table = $wpdb->prefix . leadguard_wcc_TABLE;
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE IF NOT EXISTS {$table} (
@@ -48,21 +48,21 @@ class Lead_Guard_Activator
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
 
-        if (!get_option('leadguard_said_settings')) {
-            add_option('leadguard_said_settings', leadguard_said_default_settings());
+        if (!get_option('leadguard_wcc_settings')) {
+            add_option('leadguard_wcc_settings', leadguard_wcc_default_settings());
         }
-        if (!get_option('leadguard_said_hmac_secret')) {
-            add_option('leadguard_said_hmac_secret', wp_generate_password(64, true, true));
+        if (!get_option('leadguard_wcc_hmac_secret')) {
+            add_option('leadguard_wcc_hmac_secret', wp_generate_password(64, true, true));
         }
     }
 
     public static function maybe_migrate_db(): void
     {
-        $installed = get_option('leadguard_said_db_version', '0');
+        $installed = get_option('leadguard_wcc_db_version', '0');
         if (version_compare($installed, '2.2.0', '>=')) return;
 
         global $wpdb;
-        $table = $wpdb->prefix . LEADGUARD_SAID_TABLE;
+        $table = $wpdb->prefix . leadguard_wcc_TABLE;
 
         $cols = $wpdb->get_col("DESCRIBE {$table}", 0);
         if (!in_array('traffic_source', $cols, true)) {
@@ -85,6 +85,6 @@ class Lead_Guard_Activator
             $wpdb->query("ALTER TABLE {$table} ADD COLUMN token_fp_mismatch TINYINT(1) DEFAULT 0 AFTER device_fingerprint");
         }
 
-        update_option('leadguard_said_db_version', '2.2.0');
+        update_option('leadguard_wcc_db_version', '2.2.0');
     }
 }

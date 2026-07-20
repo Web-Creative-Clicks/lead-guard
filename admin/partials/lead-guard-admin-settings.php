@@ -3,16 +3,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-if (isset($_POST['leadguard_said_test_webhook']) && check_admin_referer('leadguard_said_test_webhook')) {
-    $test_result = leadguard_said_push_to_google_sheets(
+if (isset($_POST['leadguard_wcc_test_webhook']) && check_admin_referer('leadguard_wcc_test_webhook')) {
+    $test_result = leadguard_wcc_push_to_google_sheets(
         [
             'name' => 'Lead Guard Test',
             'email' => 'test@example.com',
             'phone' => '0600000000',
-            'page_url' => admin_url('admin.php?page=leadguard-said-settings'),
+            'page_url' => admin_url('admin.php?page=leadguard-wcc-settings'),
             'test_submission' => 'TRUE',
         ],
-        leadguard_said_get_client_ip(),
+        leadguard_wcc_get_client_ip(),
         sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? ''),
         5000,
         0,
@@ -23,13 +23,13 @@ if (isset($_POST['leadguard_said_test_webhook']) && check_admin_referer('leadgua
     );
 
     if (!empty($test_result['success'])) {
-        echo '<div class="notice notice-success"><p><strong>Apps Script test succeeded.</strong> HTTP ' . esc_html((string) $test_result['code']) . '. Check the Said sheet for the test row.</p></div>';
+        echo '<div class="notice notice-success"><p><strong>Apps Script test succeeded.</strong> HTTP ' . esc_html((string) $test_result['code']) . '. Check the Web Creative Clicks sheet for the test row.</p></div>';
     } else {
-        echo '<div class="notice notice-error"><p><strong>Apps Script test failed:</strong> ' . esc_html((string) ($test_result['error'] ?? 'unknown_error')) . ' — HTTP ' . esc_html((string) ($test_result['code'] ?? 0)) . '</p><p><code style="white-space:pre-wrap">' . esc_html((string) ($test_result['body'] ?? '')) . '</code></p></div>';
+        echo '<div class="notice notice-error"><p><strong>Apps Script test failed:</strong> ' . esc_html((string) ($test_result['error'] ?? 'unknown_error')) . ' â€” HTTP ' . esc_html((string) ($test_result['code'] ?? 0)) . '</p><p><code style="white-space:pre-wrap">' . esc_html((string) ($test_result['body'] ?? '')) . '</code></p></div>';
     }
 }
-if (isset($_POST['leadguard_said_settings_save']) && check_admin_referer('leadguard_said_settings')) {
-    update_option('leadguard_said_settings', [
+if (isset($_POST['leadguard_wcc_settings_save']) && check_admin_referer('leadguard_wcc_settings')) {
+    update_option('leadguard_wcc_settings', [
         'block_threshold' => (int) $_POST['block_threshold'],
         'reject_threshold' => (int) $_POST['reject_threshold'],
         'max_per_ip_10min' => (int) $_POST['max_per_ip_10min'],
@@ -60,21 +60,21 @@ if (isset($_POST['leadguard_said_settings_save']) && check_admin_referer('leadgu
     ]);
     echo '<div class="updated"><p>Settings saved.</p></div>';
 }
-$s = leadguard_said_get_settings();
+$s = leadguard_wcc_get_settings();
 ?>
 <div class="wrap">
-    <h1>Lead Guard — Settings</h1>
-    <p>Init endpoint: <code><?php echo esc_url(rest_url('leadguard-said/v1/init')); ?></code></p>
-    <p>Submit endpoint: <code><?php echo esc_url(rest_url('leadguard-said/v1/submit')); ?></code></p>
+    <h1>Lead Guard â€” Settings</h1>
+    <p>Init endpoint: <code><?php echo esc_url(rest_url('leadguard-wcc/v1/init')); ?></code></p>
+    <p>Submit endpoint: <code><?php echo esc_url(rest_url('leadguard-wcc/v1/submit')); ?></code></p>
 
-    <?php $last_sheet_result = get_option('leadguard_said_last_sheets_result', []); ?>
+    <?php $last_sheet_result = get_option('leadguard_wcc_last_sheets_result', []); ?>
     <?php if (!empty($last_sheet_result)): ?>
         <div class="notice inline <?php echo !empty($last_sheet_result['success']) ? 'notice-success' : 'notice-error'; ?>">
             <p><strong>Last Apps Script delivery:</strong>
                 <?php echo !empty($last_sheet_result['success']) ? 'SUCCESS' : 'FAILED'; ?>
-                — HTTP
+                â€” HTTP
                 <?php echo esc_html((string) ($last_sheet_result['code'] ?? 0)); ?>
-                —
+                â€”
                 <?php echo esc_html((string) ($last_sheet_result['checked_at'] ?? '')); ?>
             </p>
             <?php if (!empty($last_sheet_result['error'])): ?>
@@ -88,7 +88,7 @@ $s = leadguard_said_get_settings();
     <?php endif; ?>
 
     <form method="post">
-        <?php wp_nonce_field('leadguard_said_settings'); ?>
+        <?php wp_nonce_field('leadguard_wcc_settings'); ?>
         <table class="form-table">
 
             <tr>
@@ -140,7 +140,7 @@ $s = leadguard_said_get_settings();
                 <th>Require math captcha</th>
                 <td>
                     <input type="checkbox" name="require_math_captcha" <?php checked($s['require_math_captcha'], 1); ?>>
-                    <p class="description">Server-verified signed token — cannot be bypassed by always answering "10".
+                    <p class="description">Server-verified signed token â€” cannot be bypassed by always answering "10".
                     </p>
                 </td>
             </tr>
@@ -202,7 +202,7 @@ $s = leadguard_said_get_settings();
                     <p class="description">
                         Free key at <a href="https://app.abstractapi.com/api/email-validation/documentation"
                             target="_blank">abstractapi.com</a>.
-                        API key is never sent to the browser — all checks are server-side proxied.
+                        API key is never sent to the browser â€” all checks are server-side proxied.
                     </p>
                 </td>
             </tr>
@@ -265,7 +265,7 @@ $s = leadguard_said_get_settings();
                     <input type="url" class="large-text" name="google_sheets_webhook"
                         value="<?php echo esc_attr($s['google_sheets_webhook']); ?>"
                         placeholder="https://script.google.com/macros/s/AKfycb.../exec">
-                    <p class="description">URL stays server-side — never exposed in page HTML.</p>
+                    <p class="description">URL stays server-side â€” never exposed in page HTML.</p>
                 </td>
             </tr>
 
@@ -316,7 +316,7 @@ $s = leadguard_said_get_settings();
                 <td>
                     <input type="number" name="token_max_age_min"
                         value="<?php echo esc_attr($s['token_max_age_min']); ?>">
-                    <p class="description">Single-use HMAC-signed tokens — cannot be reused or forged. Tokens are
+                    <p class="description">Single-use HMAC-signed tokens â€” cannot be reused or forged. Tokens are
                         also bound to the requesting IP+User-Agent; a mismatch at submit time is scored as
                         <code>token_device_mismatch</code>.
                     </p>
@@ -343,7 +343,7 @@ $s = leadguard_said_get_settings();
                 <th>Max /init token requests per IP / 10 min</th>
                 <td><input type="number" name="rate_limit_init_per_10min"
                         value="<?php echo esc_attr($s['rate_limit_init_per_10min']); ?>">
-                    <p class="description">Previously unlimited — a script could mint unlimited signed tokens
+                    <p class="description">Previously unlimited â€” a script could mint unlimited signed tokens
                         per second.</p>
                 </td>
             </tr>
@@ -382,7 +382,7 @@ $s = leadguard_said_get_settings();
             </tr>
 
         </table>
-        <?php submit_button('Save Settings', 'primary', 'leadguard_said_settings_save'); ?>
+        <?php submit_button('Save Settings', 'primary', 'leadguard_wcc_settings_save'); ?>
     </form>
 
     <hr>
@@ -390,7 +390,7 @@ $s = leadguard_said_get_settings();
     <p>This sends one test row through WordPress and shows the real Google response instead of silently pretending it
         worked.</p>
     <form method="post">
-        <?php wp_nonce_field('leadguard_said_test_webhook'); ?>
-        <?php submit_button('Test Apps Script Now', 'secondary', 'leadguard_said_test_webhook'); ?>
+        <?php wp_nonce_field('leadguard_wcc_test_webhook'); ?>
+        <?php submit_button('Test Apps Script Now', 'secondary', 'leadguard_wcc_test_webhook'); ?>
     </form>
 </div>

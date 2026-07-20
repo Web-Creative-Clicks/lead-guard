@@ -5,10 +5,10 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 }
 
 global $wpdb;
-$table = $wpdb->prefix . 'leadguard_said_submissions';
+$table = $wpdb->prefix . 'leadguard_wcc_submissions';
 $wpdb->query("DROP TABLE IF EXISTS {$table}");
 
-delete_option('leadguard_said_settings');
-delete_option('leadguard_said_hmac_secret');
-delete_option('leadguard_said_db_version');
-delete_option('leadguard_said_last_sheets_result');
+delete_option('leadguard_wcc_settings');
+delete_option('leadguard_wcc_hmac_secret');
+delete_option('leadguard_wcc_db_version');
+delete_option('leadguard_wcc_last_sheets_result');

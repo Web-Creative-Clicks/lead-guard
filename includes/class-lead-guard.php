@@ -15,10 +15,10 @@ class Lead_Guard
 
     private function load_dependencies(): void
     {
-        require_once LEADGUARD_SAID_DIR . 'includes/lead-guard-helpers.php';
-        require_once LEADGUARD_SAID_DIR . 'api/class-lead-guard-api.php';
-        require_once LEADGUARD_SAID_DIR . 'admin/class-lead-guard-admin.php';
-        require_once LEADGUARD_SAID_DIR . 'public/class-lead-guard-public.php';
+        require_once leadguard_wcc_DIR . 'includes/lead-guard-helpers.php';
+        require_once leadguard_wcc_DIR . 'api/class-lead-guard-api.php';
+        require_once leadguard_wcc_DIR . 'admin/class-lead-guard-admin.php';
+        require_once leadguard_wcc_DIR . 'public/class-lead-guard-public.php';
     }
 
     private function define_admin_hooks(): void
