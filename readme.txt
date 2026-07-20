@@ -1,8 +1,8 @@
-=== Lead Guard ===
+=== Lead Guard - Fake Lead & Bot Blocker ===
 Contributors: webcreativeclicks
 Tags: anti-bot, fake lead, security, turnstile, captcha, spam protection
 Requires at least: 5.8
-Tested up to: 6.4
+Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: 2.2.0
 License: GPLv2 or later
