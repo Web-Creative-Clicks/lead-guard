@@ -8,7 +8,7 @@ class Leadguard_WCC_Admin
     public function register_menus(): void
     {
         add_action('admin_menu', function () {
-            add_menu_page('Lead Guard', 'Lead Guard', 'manage_options', 'leadguard-wcc', [$this, 'render_submissions_page'], 'dashicons-shield', 58);
+            add_menu_page('WCC Lead & Bot Guard', 'WCC Lead Guard', 'manage_options', 'leadguard-wcc', [$this, 'render_submissions_page'], 'dashicons-shield', 58);
             add_submenu_page('leadguard-wcc', 'Submissions', 'Submissions', 'manage_options', 'leadguard-wcc', [$this, 'render_submissions_page']);
             add_submenu_page('leadguard-wcc', 'Settings', 'Settings', 'manage_options', 'leadguard-wcc-settings', [$this, 'render_settings_page']);
         });

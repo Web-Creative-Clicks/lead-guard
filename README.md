@@ -1,6 +1,6 @@
-# Lead Guard
+# WCC Lead & Bot Guard
 
-**Lead Guard** is an advanced, professional WordPress plugin developed by Web Creative Clicks designed to deliver ultimate protection against fake leads, bot submissions, and spam. 
+**WCC Lead & Bot Guard** is an advanced, professional WordPress plugin developed by Web Creative Clicks designed to deliver ultimate protection against fake leads, bot submissions, and spam. 
 
 It implements cutting-edge behavioral analysis, server-side cryptographic checks, and advanced fingerprinting to ensure that every lead entering your system is legitimate.
 
@@ -35,7 +35,7 @@ It implements cutting-edge behavioral analysis, server-side cryptographic checks
 ## Usage
 
 ### 1. Configuration
-Go to **Lead Guard -> Settings** in your WordPress dashboard to configure thresholds, add your API keys (Turnstile, AbstractAPI), and set up your Google Sheets webhook URL.
+Go to **WCC Lead Guard -> Settings** in your WordPress dashboard to configure thresholds, add your API keys (Turnstile, AbstractAPI), and set up your Google Sheets webhook URL.
 
 ### 2. Displaying the Form
 Use the provided shortcode anywhere on your site to display the secure lead form:
@@ -44,15 +44,12 @@ Use the provided shortcode anywhere on your site to display the secure lead form
 ```
 
 ### 3. Reviewing Submissions
-Navigate to **Lead Guard -> Submissions** to view all captured leads. You can review their fraud scores, traffic sources, device fingerprints, and manually mark submissions as clean or block them completely.
+Navigate to **WCC Lead Guard -> Submissions** to view all captured leads. You can review their fraud scores, traffic sources, device fingerprints, and manually mark submissions as clean or block them completely.
 
 ## Architecture
 
-This plugin has been built with a modern, modular Object-Oriented (OOP) architecture for ultimate scalability and maintainability:
-- `admin/`: Dashboard UI, Submissions view, Settings view.
-- `api/`: Custom REST API endpoints for secure form submission and validation.
-- `includes/`: Core plugin logic, activation scripts, and helpers.
-- `public/`: Frontend shortcode rendering and scoped CSS injection.
-
-## License
-GPL v2 or later.
+* `wcc-lead-guard.php`: Core plugin bootstrap.
+* `admin/`: Admin UI, settings management, submissions table.
+* `api/`: REST API endpoints for secure token init, email verification, and submission handling.
+* `includes/`: Cryptographic hashing, validation logic, external service callers (Apps Script, Meta CAPI).
+* `public/`: Frontend shortcode rendering and interactive form handler with bot decoy mechanisms.

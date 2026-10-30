@@ -36,8 +36,8 @@ class Leadguard_WCC_Public
         $site_key = esc_attr($settings['turnstile_site_key']);
         $require_turnstile = !empty($settings['require_turnstile']);
         if ($require_turnstile && !empty($site_key)) {
-            // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent
-            wp_enqueue_script('leadguard-wcc-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
+            // phpcs:ignore PluginCheck.CodeAnalysis.EnqueuedResourceOffloading.OffloadedContent, WordPress.WP.EnqueuedResourceParameters.MissingVersion
+            wp_enqueue_script('leadguard-wcc-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], leadguard_wcc_VERSION, true);
         }
         $require_math_captcha = !empty($settings['require_math_captcha']);
         $email_verify_enabled = !empty($settings['email_verify_api_key']);

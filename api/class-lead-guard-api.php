@@ -267,7 +267,7 @@ class Leadguard_WCC_API
             $reasons[] = 'blocked_email';
         }
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $count_ip = (int) $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$table} WHERE ip_address=%s AND created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)",
             $ip
@@ -277,7 +277,6 @@ class Leadguard_WCC_API
             $reasons[] = "ip_rate_limit_exceeded_{$count_ip}";
         }
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $count_global = (int) $wpdb->get_var(
             "SELECT COUNT(*) FROM {$table} WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)"
         );
@@ -287,7 +286,6 @@ class Leadguard_WCC_API
         }
 
         if (!empty($fbclid)) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $dupe = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table} WHERE fbclid=%s AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)",
                 $fbclid
@@ -308,7 +306,6 @@ class Leadguard_WCC_API
         }
 
         if ($device_key !== null) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $bad_count = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table}
                  WHERE (device_id = %s OR device_fingerprint = %s)
@@ -325,6 +322,7 @@ class Leadguard_WCC_API
                 $reasons[] = "repeat_offender_device_{$bad_count}";
             }
         }
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         $status = $score >= (int) $settings['reject_threshold'] ? 'rejected'
             : ($score >= (int) $settings['block_threshold'] ? 'suspicious' : 'clean');

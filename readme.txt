@@ -1,4 +1,4 @@
-=== Lead Guard - Fake Lead & Bot Blocker ===
+=== WCC Lead & Bot Guard ===
 Contributors: webcreativeclicks
 Tags: anti-bot, fake-lead, security, turnstile, spam-protection
 Requires at least: 5.8
@@ -12,7 +12,7 @@ Ultimate anti-bot and fake lead blocker with rotating CSS classes, device finger
 
 == Description ==
 
-Lead Guard is an advanced, professional WordPress plugin developed by Web Creative Clicks designed to deliver ultimate protection against fake leads, bot submissions, and spam. 
+WCC Lead & Bot Guard is an advanced, professional WordPress plugin developed by Web Creative Clicks designed to deliver ultimate protection against fake leads, bot submissions, and spam. 
 
 It implements cutting-edge behavioral analysis, server-side cryptographic checks, and advanced fingerprinting to ensure that every lead entering your system is legitimate.
 
@@ -64,7 +64,7 @@ This plugin integrates with external third-party services to deliver fraud detec
 2. Navigate to your WordPress Admin dashboard -> **Plugins** -> **Add New**.
 3. Upload the `.zip` file and click **Install Now**.
 4. Click **Activate Plugin**.
-5. Go to **Lead Guard -> Settings** in your WordPress dashboard to configure your API keys.
+5. Go to **WCC Lead Guard -> Settings** in your WordPress dashboard to configure your API keys.
 6. Use the provided shortcode anywhere on your site to display the secure lead form: `[leadguard_wcc_form title="Register Now" button_text="Submit" redirect="https://yoursite.com/thank-you"]`
 
 == Frequently Asked Questions ==

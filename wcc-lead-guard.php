@@ -1,11 +1,12 @@
 <?php
 /**
- * Plugin Name: Lead Guard - Fake Lead & Bot Blocker
+ * Plugin Name: WCC Lead & Bot Guard
  * Plugin URI:  https://github.com/Web-Creative-Clicks
  * Description: Ultimate anti-bot and fake lead protection. Uses cryptographically rotating CSS classes, persistent device fingerprinting, interaction timing, Turnstile, and Apps Script Webhook delivery.
  * Version:     2.2.0
  * Author:      Web Creative Clicks
  * License:     GPL v2 or later
+ * Text Domain: wcc-lead-guard
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

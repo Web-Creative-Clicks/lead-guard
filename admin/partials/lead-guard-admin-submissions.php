@@ -76,7 +76,7 @@ if (in_array($leadguard_wcc_filter, ['clean', 'suspicious', 'rejected'], true)) 
 $leadguard_wcc_counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$leadguard_wcc_table} GROUP BY status", OBJECT_K);
 ?>
 <div class="wrap">
-    <h1>Lead Guard â€” Submissions</h1>
+    <h1>WCC Lead &amp; Bot Guard â€” Submissions</h1>
     <ul class="subsubsub">
         <li><a href="?page=leadguard-wcc">All</a> |</li>
         <li><a href="?page=leadguard-wcc&status=clean">Clean (
@@ -178,12 +178,13 @@ $leadguard_wcc_counts = $wpdb->get_results("SELECT status, COUNT(*) c FROM {$lea
                         $leadguard_wcc_dev_key = $leadguard_wcc_r->device_id ?: $leadguard_wcc_r->device_fingerprint;
                         if ($leadguard_wcc_dev_key) {
                             $leadguard_wcc_dev_short = substr($leadguard_wcc_dev_key, 0, 8) . 'â€¦';
-                            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                             $leadguard_wcc_dev_bad_count = (int) $wpdb->get_var($wpdb->prepare(
                                 "SELECT COUNT(*) FROM {$leadguard_wcc_table} WHERE (device_id=%s OR device_fingerprint=%s) AND status IN ('rejected','suspicious')",
                                 $leadguard_wcc_dev_key,
                                 $leadguard_wcc_dev_key
                             ));
+                            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                             echo '<code title="' . esc_attr($leadguard_wcc_dev_key) . '">' . esc_html($leadguard_wcc_dev_short) . '</code>';
                             if ($leadguard_wcc_dev_bad_count > 1) {
                                 echo ' <span style="color:#d63638;font-weight:700;">Ã—' . (int) $leadguard_wcc_dev_bad_count . '</span>';

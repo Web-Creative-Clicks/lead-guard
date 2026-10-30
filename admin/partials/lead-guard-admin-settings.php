@@ -45,12 +45,12 @@ if (isset($_POST['leadguard_wcc_settings_save']) && check_admin_referer('leadgua
         'blocked_ips' => isset($_POST['blocked_ips']) ? sanitize_textarea_field(wp_unslash($_POST['blocked_ips'])) : '',
         'blocked_emails' => isset($_POST['blocked_emails']) ? sanitize_textarea_field(wp_unslash($_POST['blocked_emails'])) : '',
         'phone_country' => isset($_POST['phone_country']) ? sanitize_text_field(wp_unslash($_POST['phone_country'])) : 'MA',
-        'google_sheets_webhook' => isset($_POST['google_sheets_webhook']) ? esc_url_raw(trim(wp_unslash($_POST['google_sheets_webhook']))) : '',
+        'google_sheets_webhook' => isset($_POST['google_sheets_webhook']) ? sanitize_url(wp_unslash($_POST['google_sheets_webhook'])) : '',
         'token_max_age_min' => isset($_POST['token_max_age_min']) ? max(1, absint($_POST['token_max_age_min'])) : 30,
         'email_verify_api_key' => isset($_POST['email_verify_api_key']) ? sanitize_text_field(wp_unslash($_POST['email_verify_api_key'])) : '',
         'selector_rotation_mode' => isset($_POST['selector_rotation_mode']) ? sanitize_key(wp_unslash($_POST['selector_rotation_mode'])) : 'pageload',
         'selector_interval_min' => isset($_POST['selector_interval_min']) ? max(1, absint($_POST['selector_interval_min'])) : 30,
-        'thankyou_url' => isset($_POST['thankyou_url']) ? esc_url_raw(trim(wp_unslash($_POST['thankyou_url']))) : '',
+        'thankyou_url' => isset($_POST['thankyou_url']) ? sanitize_url(wp_unslash($_POST['thankyou_url'])) : '',
         'trust_cf_ip_only' => isset($_POST['trust_cf_ip_only']) ? 1 : 0,
         'rate_limit_init_per_10min' => isset($_POST['rate_limit_init_per_10min']) ? max(0, absint($_POST['rate_limit_init_per_10min'])) : 20,
         'rate_limit_checkemail_per_10min' => isset($_POST['rate_limit_checkemail_per_10min']) ? max(0, absint($_POST['rate_limit_checkemail_per_10min'])) : 10,
@@ -63,7 +63,7 @@ if (isset($_POST['leadguard_wcc_settings_save']) && check_admin_referer('leadgua
 $leadguard_wcc_s = leadguard_wcc_get_settings();
 ?>
 <div class="wrap">
-    <h1>Lead Guard â€” Settings</h1>
+    <h1>WCC Lead &amp; Bot Guard â€” Settings</h1>
     <p>Init endpoint: <code><?php echo esc_url(rest_url('leadguard-wcc/v1/init')); ?></code></p>
     <p>Submit endpoint: <code><?php echo esc_url(rest_url('leadguard-wcc/v1/submit')); ?></code></p>
 
