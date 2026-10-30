@@ -1,14 +1,14 @@
 === Lead Guard - Fake Lead & Bot Blocker ===
 Contributors: webcreativeclicks
-Tags: anti-bot, fake lead, security, turnstile, captcha, spam protection
+Tags: anti-bot, fake-lead, security, turnstile, spam-protection
 Requires at least: 5.8
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Ultimate anti-bot and fake lead protection. Uses cryptographically rotating CSS classes, persistent device fingerprinting, interaction timing, Turnstile, and Apps Script Webhook delivery.
+Ultimate anti-bot and fake lead blocker with rotating CSS classes, device fingerprinting, interaction timing, Turnstile, and Google Sheets webhook.
 
 == Description ==
 
@@ -33,6 +33,30 @@ It implements cutting-edge behavioral analysis, server-side cryptographic checks
 * Burst Detection
 * Manual Blocklists (IPs and Emails)
 * Cloudflare IP Trust validation
+
+== External Services ==
+
+This plugin integrates with external third-party services to deliver fraud detection, challenge verification, and webhook delivery:
+
+* **Cloudflare Turnstile**: Provides privacy-friendly bot challenge verification.
+  - Service URL: https://www.cloudflare.com/products/turnstile/
+  - Terms of Service: https://www.cloudflare.com/website-terms/
+  - Privacy Policy: https://www.cloudflare.com/privacypolicy/
+
+* **AbstractAPI**: Validates email deliverability and blocks temporary disposable domains.
+  - Service URL: https://www.abstractapi.com/api/email-validation
+  - Terms of Service: https://www.abstractapi.com/legal/terms-of-service
+  - Privacy Policy: https://www.abstractapi.com/legal/privacy-policy
+
+* **Google Sheets (Google Apps Script)**: Server-to-server webhook destination for verified lead data.
+  - Service URL: https://workspace.google.com/products/sheets/
+  - Terms of Service: https://policies.google.com/terms
+  - Privacy Policy: https://policies.google.com/privacy
+
+* **Meta Conversions API (CAPI)**: Transmits clean lead conversion events directly to Meta.
+  - Service URL: https://developers.facebook.com/docs/marketing-api/conversions-api/
+  - Terms of Service: https://www.facebook.com/legal/terms
+  - Data Policy: https://www.facebook.com/privacy/policy/
 
 == Installation ==
 

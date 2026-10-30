@@ -1,9 +1,9 @@
 <?php
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class Lead_Guard_API
+class Leadguard_WCC_API
 {
     public function register_routes(): void
     {
@@ -71,7 +71,7 @@ class Lead_Guard_API
             default => $a + $b,
         };
 
-        $ua = sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? '');
+        $ua = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
         $fp_bind = substr(hash('sha256', $ip . '|' . $ua), 0, 32);
 
         $sig = hash_hmac('sha256', "{$nonce}|{$issued_at}|{$answer}|{$fp_bind}", $secret);
@@ -137,7 +137,7 @@ class Lead_Guard_API
         }
         
         $ip = leadguard_wcc_get_client_ip();
-        $ua = sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? '');
+        $ua = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
         $name = sanitize_text_field($params['name'] ?? '');
         $email = sanitize_email($params['email'] ?? '');
         $phone = sanitize_text_field($params['phone'] ?? '');
@@ -267,6 +267,7 @@ class Lead_Guard_API
             $reasons[] = 'blocked_email';
         }
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $count_ip = (int) $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$table} WHERE ip_address=%s AND created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)",
             $ip
@@ -276,6 +277,7 @@ class Lead_Guard_API
             $reasons[] = "ip_rate_limit_exceeded_{$count_ip}";
         }
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $count_global = (int) $wpdb->get_var(
             "SELECT COUNT(*) FROM {$table} WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)"
         );
@@ -285,6 +287,7 @@ class Lead_Guard_API
         }
 
         if (!empty($fbclid)) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $dupe = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table} WHERE fbclid=%s AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)",
                 $fbclid
@@ -305,6 +308,7 @@ class Lead_Guard_API
         }
 
         if ($device_key !== null) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $bad_count = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table}
                  WHERE (device_id = %s OR device_fingerprint = %s)
@@ -325,6 +329,7 @@ class Lead_Guard_API
         $status = $score >= (int) $settings['reject_threshold'] ? 'rejected'
             : ($score >= (int) $settings['block_threshold'] ? 'suspicious' : 'clean');
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
         $wpdb->insert($table, [
             'created_at' => current_time('mysql'),
             'name' => $name,

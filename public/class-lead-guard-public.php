@@ -1,13 +1,19 @@
 <?php
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class Lead_Guard_Public
+class Leadguard_WCC_Public
 {
     public function register_shortcodes(): void
     {
         add_shortcode('leadguard_wcc_form', [$this, 'render_shortcode']);
+        add_filter('script_loader_tag', function ($tag, $handle) {
+            if ($handle === 'leadguard-wcc-turnstile') {
+                return str_replace(' src=', ' async defer src=', $tag);
+            }
+            return $tag;
+        }, 10, 2);
     }
 
     public function render_shortcode($atts): string
@@ -29,6 +35,10 @@ class Lead_Guard_Public
         $check_email_url = esc_url(rest_url('leadguard-wcc/v1/check-email'));
         $site_key = esc_attr($settings['turnstile_site_key']);
         $require_turnstile = !empty($settings['require_turnstile']);
+        if ($require_turnstile && !empty($site_key)) {
+            // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent
+            wp_enqueue_script('leadguard-wcc-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
+        }
         $require_math_captcha = !empty($settings['require_math_captcha']);
         $email_verify_enabled = !empty($settings['email_verify_api_key']);
         // Priority: shortcode attribute â†’ plugin global setting â†’ '' (show inline message)
@@ -52,7 +62,7 @@ class Lead_Guard_Public
             if (empty($_SESSION[$map_key])) {
                 $_SESSION[$map_key] = leadguard_wcc_generate_selector_map($uid);
             }
-            $m = $_SESSION[$map_key];
+            $m = is_array($_SESSION[$map_key]) ? array_map('sanitize_key', $_SESSION[$map_key]) : leadguard_wcc_generate_selector_map($uid);
 
         } elseif ($mode === 'interval') {
             // New names every N minutes (stored in WordPress transient)
@@ -326,7 +336,7 @@ class Lead_Guard_Public
 
                 <!-- Turnstile widget -->
                 <?php if ($require_turnstile && $site_key): ?>
-                    <div class="cf-turnstile" data-sitekey="<?php echo $site_key; ?>" data-theme="dark"
+                    <div class="cf-turnstile" data-sitekey="<?php echo esc_attr($site_key); ?>" data-theme="dark"
                         style="display:flex;justify-content:center;margin-top:8px;"></div>
                 <?php endif; ?>
 
@@ -337,10 +347,7 @@ class Lead_Guard_Public
             </form>
         </div><!-- /#<?php echo esc_attr($id_wrap); ?> -->
 
-        <?php if ($require_turnstile && $site_key && !$turnstile_js): ?>
-            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-            <?php $turnstile_js = true; ?>
-        <?php endif; ?>
+
 
         <script>
             (function () {

@@ -1,12 +1,13 @@
 <?php
 // If uninstall not called from WordPress, then exit.
-if (!defined('WP_UNINSTALL_PLUGIN')) {
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     exit;
 }
 
 global $wpdb;
-$table = $wpdb->prefix . 'leadguard_wcc_submissions';
-$wpdb->query("DROP TABLE IF EXISTS {$table}");
+$leadguard_wcc_table = $wpdb->prefix . 'leadguard_wcc_submissions';
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange
+$wpdb->query("DROP TABLE IF EXISTS {$leadguard_wcc_table}");
 
 delete_option('leadguard_wcc_settings');
 delete_option('leadguard_wcc_hmac_secret');

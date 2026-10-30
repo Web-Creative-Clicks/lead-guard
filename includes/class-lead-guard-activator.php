@@ -1,9 +1,9 @@
 <?php
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class Lead_Guard_Activator
+class Leadguard_WCC_Activator
 {
     public static function activate(): void
     {
@@ -59,29 +59,40 @@ class Lead_Guard_Activator
     public static function maybe_migrate_db(): void
     {
         $installed = get_option('leadguard_wcc_db_version', '0');
-        if (version_compare($installed, '2.2.0', '>=')) return;
+        if (version_compare($installed, '2.2.0', '>=')) {
+            return;
+        }
 
         global $wpdb;
         $table = $wpdb->prefix . leadguard_wcc_TABLE;
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $cols = $wpdb->get_col("DESCRIBE {$table}", 0);
         if (!in_array('traffic_source', $cols, true)) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD COLUMN traffic_source VARCHAR(50) NULL AFTER raw_payload");
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD INDEX traffic_source (traffic_source)");
         }
         if (!in_array('utm_params', $cols, true)) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD COLUMN utm_params TEXT NULL AFTER traffic_source");
         }
 
         if (!in_array('device_id', $cols, true)) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD COLUMN device_id VARCHAR(64) NULL AFTER utm_params");
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD INDEX device_id (device_id)");
         }
         if (!in_array('device_fingerprint', $cols, true)) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD COLUMN device_fingerprint VARCHAR(64) NULL AFTER device_id");
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD INDEX device_fingerprint (device_fingerprint)");
         }
         if (!in_array('token_fp_mismatch', $cols, true)) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $wpdb->query("ALTER TABLE {$table} ADD COLUMN token_fp_mismatch TINYINT(1) DEFAULT 0 AFTER device_fingerprint");
         }
 

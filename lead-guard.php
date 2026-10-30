@@ -8,7 +8,7 @@
  * License:     GPL v2 or later
  */
 
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
@@ -23,11 +23,11 @@ require_once leadguard_wcc_DIR . 'includes/class-lead-guard-activator.php';
 require_once leadguard_wcc_DIR . 'includes/class-lead-guard.php';
 
 // Register activation hook
-register_activation_hook(__FILE__, ['Lead_Guard_Activator', 'activate']);
+register_activation_hook(__FILE__, ['Leadguard_WCC_Activator', 'activate']);
 
 // Boot the plugin
-function run_lead_guard() {
-    $plugin = new Lead_Guard();
+function leadguard_wcc_run() {
+    $plugin = new Leadguard_WCC();
     $plugin->run();
 }
-run_lead_guard();
+leadguard_wcc_run();

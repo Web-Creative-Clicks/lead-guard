@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
@@ -183,7 +183,7 @@ function leadguard_wcc_ip_in_cidr(string $ip, string $cidr): bool
 
 function leadguard_wcc_request_is_from_cloudflare(): bool
 {
-    $remote = $_SERVER['REMOTE_ADDR'] ?? '';
+    $remote = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
     if (!$remote) return false;
     foreach (leadguard_wcc_cloudflare_ranges() as $cidr) {
         if (leadguard_wcc_ip_in_cidr($remote, $cidr)) return true;
@@ -195,13 +195,14 @@ function leadguard_wcc_get_client_ip(): string
 {
     $settings = leadguard_wcc_get_settings();
     if (!empty($settings['trust_cf_ip_only']) && !leadguard_wcc_request_is_from_cloudflare()) {
-        $remote = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $remote = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '0.0.0.0';
         return filter_var($remote, FILTER_VALIDATE_IP) ? $remote : '0.0.0.0';
     }
 
     foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'] as $k) {
         if (!empty($_SERVER[$k])) {
-            $ip = trim(explode(',', $_SERVER[$k])[0]);
+            $raw_server_val = sanitize_text_field(wp_unslash($_SERVER[$k]));
+            $ip = trim(explode(',', $raw_server_val)[0]);
             if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
         }
     }
@@ -216,7 +217,7 @@ function leadguard_wcc_sign_device_id(string $id, string $secret): string
 function leadguard_wcc_verify_device_cookie(): ?string
 {
     $secret = get_option('leadguard_wcc_hmac_secret');
-    $raw = $_COOKIE[leadguard_wcc_DEVICE_COOKIE] ?? '';
+    $raw = isset($_COOKIE[leadguard_wcc_DEVICE_COOKIE]) ? sanitize_text_field(wp_unslash($_COOKIE[leadguard_wcc_DEVICE_COOKIE])) : '';
     if (!$raw || strpos($raw, '.') === false) return null;
     [$id, $sig] = array_pad(explode('.', $raw, 2), 2, '');
     if (!$id || !$sig) return null;
@@ -234,9 +235,11 @@ function leadguard_wcc_ensure_device_cookie(): string
     $new_id = bin2hex(random_bytes(16));
     $cookie_value = leadguard_wcc_sign_device_id($new_id, $secret);
 
+    // 1-year lifetime
     setcookie(leadguard_wcc_DEVICE_COOKIE, $cookie_value, [
-        'expires' => time() + YEAR_IN_SECONDS,
-        'path' => '/',
+        'expires' => time() + 31536000,
+        'path' => COOKIEPATH ?: '/',
+        'domain' => COOKIE_DOMAIN ?: '',
         'secure' => is_ssl(),
         'httponly' => false,
         'samesite' => 'Lax',
@@ -248,6 +251,7 @@ function leadguard_wcc_ensure_device_cookie(): string
 function leadguard_wcc_verify_turnstile(string $token, string $secret): bool
 {
     if (empty($token) || empty($secret)) return false;
+    // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent
     $resp = wp_remote_post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
         'body' => ['secret' => $secret, 'response' => $token, 'remoteip' => leadguard_wcc_get_client_ip()],
         'timeout' => 8,
@@ -356,7 +360,10 @@ function leadguard_wcc_push_to_google_sheets($params, $ip, $ua, $fill_time_ms, $
     update_option('leadguard_wcc_last_sheets_result', $result, false);
 
     if (!$result['success']) {
-        error_log('[Lead Guard] Google Sheets delivery failed: ' . wp_json_encode($result));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            error_log('[Lead Guard] Google Sheets delivery failed: ' . wp_json_encode($result));
+        }
     }
 
     return $result;

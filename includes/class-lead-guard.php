@@ -1,9 +1,9 @@
 <?php
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class Lead_Guard
+class Leadguard_WCC
 {
     public function __construct()
     {
@@ -23,25 +23,25 @@ class Lead_Guard
 
     private function define_admin_hooks(): void
     {
-        $admin = new Lead_Guard_Admin();
+        $admin = new Leadguard_WCC_Admin();
         $admin->register_menus();
     }
 
     private function define_public_hooks(): void
     {
-        $public = new Lead_Guard_Public();
+        $public = new Leadguard_WCC_Public();
         $public->register_shortcodes();
     }
 
     private function define_api_hooks(): void
     {
-        $api = new Lead_Guard_API();
+        $api = new Leadguard_WCC_API();
         $api->register_routes();
     }
     
     public function run(): void
     {
         // Trigger any global initialization if needed
-        add_action('plugins_loaded', ['Lead_Guard_Activator', 'maybe_migrate_db']);
+        add_action('plugins_loaded', ['Leadguard_WCC_Activator', 'maybe_migrate_db']);
     }
 }

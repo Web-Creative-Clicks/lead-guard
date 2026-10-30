@@ -1,9 +1,9 @@
 <?php
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class Lead_Guard_Admin
+class Leadguard_WCC_Admin
 {
     public function register_menus(): void
     {
@@ -16,13 +16,17 @@ class Lead_Guard_Admin
 
     public function render_submissions_page(): void
     {
-        if (!current_user_can('manage_options')) return;
+        if (!current_user_can('manage_options')) {
+            return;
+        }
         require_once plugin_dir_path(__FILE__) . 'partials/lead-guard-admin-submissions.php';
     }
 
     public function render_settings_page(): void
     {
-        if (!current_user_can('manage_options')) return;
+        if (!current_user_can('manage_options')) {
+            return;
+        }
         require_once plugin_dir_path(__FILE__) . 'partials/lead-guard-admin-settings.php';
     }
 }
